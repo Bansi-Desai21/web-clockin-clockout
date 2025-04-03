@@ -16,7 +16,6 @@ import {
 } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { LoginDto, SignupDto } from "../dtos/user.dto";
-import { User } from "../../schemas/user.schema";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -28,7 +27,6 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: "User successfully registered",
-    type: User,
   })
   @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Bad request" })
   async signup(@Body() signupDto: SignupDto, @Req() req) {
@@ -54,10 +52,10 @@ export class AuthController {
   }
 
   @Get("users")
-  @ApiOperation({ summary: "Get list of users with type 'owner'" })
+  @ApiOperation({ summary: "Get list of users" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: "Restaurant fetched successfully",
+    description: "User list fetched successfully",
   })
   @ApiResponse({
     status: HttpStatus.INTERNAL_SERVER_ERROR,
