@@ -39,7 +39,6 @@ export class AuthService {
       });
       await user.save();
       const newUser = omit(user.toObject(), ["password"]);
-      delete newUser.password;
 
       return createResponse(
         HttpStatus.CREATED,
@@ -123,13 +122,11 @@ export class AuthService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
-      const totalUsers = await this.userModel.countDocuments({
-        userType: "owner",
-      });
+      const totalUsers = await this.userModel.countDocuments({});
       return createResponse(
         HttpStatus.OK,
         true,
-        "Restaurant fetched successfully",
+        "User list fetched successfully",
         { totalUsers, users }
       );
     } catch (error) {
