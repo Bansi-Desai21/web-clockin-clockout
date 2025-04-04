@@ -90,6 +90,7 @@ export class AuthService {
         expiresIn: "7d",
       });
       const userObject = {
+        name: user.name,
         userId: user._id,
         email: user.email,
         token: token,
