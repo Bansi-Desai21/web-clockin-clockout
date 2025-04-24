@@ -12,6 +12,7 @@ import {
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
@@ -21,6 +22,7 @@ import {
   UpdateTaskDto,
   UpdateTaskStatusDto,
 } from "../dtos/task.dto";
+import { Query } from "@nestjs/common";
 
 @ApiTags("Tasks")
 @Controller("tasks")
@@ -68,8 +70,29 @@ export class TaskController {
     description: "Task history retrieved successfully.",
   })
   @ApiResponse({ status: 404, description: "Task not found." })
-  async getTaskHistory(@Req() req) {
-    return this.taskService.getTaskHistory(req.user.id, req.url);
+  @ApiQuery({
+    name: "startDate",
+    required: false,
+    type: String,
+    description: "Start date in ISO format (e.g., 2025-04-01)",
+  })
+  @ApiQuery({
+    name: "endDate",
+    required: false,
+    type: String,
+    description: "End date in ISO format (e.g., 2025-04-30)",
+  })
+  async getTaskHistory(
+    @Req() req,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string
+  ) {
+    return this.taskService.getTaskHistory(
+      req.user.id,
+      req.url,
+      startDate,
+      endDate
+    );
   }
 
   @Patch("update-task-status/:taskId")

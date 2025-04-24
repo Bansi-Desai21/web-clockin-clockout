@@ -108,13 +108,28 @@ export class TaskService {
     }
   }
 
-  async getTaskHistory(userId: string, path: string) {
+  async getTaskHistory(
+    userId: string,
+    path: string,
+    startDate?: string,
+    endDate?: string
+  ) {
     try {
+      const start = startDate
+        ? new Date(startDate)
+        : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const end = endDate ? new Date(endDate) : new Date();
+
       const tasks = await this.taskModel
         .find({
           userId: new Types.ObjectId(userId),
+          $or: [
+            { startedAt: { $gte: start, $lte: end } },
+            { completedAt: { $gte: start, $lte: end } },
+          ],
         })
-        .populate("userId", "-password");
+        .populate("userId", "-password")
+        .sort({ updatedAt: -1 });
 
       const formattedTasks = tasks.map((task) => {
         const startTime = task.startedAt ? new Date(task.startedAt) : null;
@@ -133,6 +148,8 @@ export class TaskService {
           endTime: endTime ? this.formatTime(endTime) : "--",
           duration,
           isRunning: !task.completedAt,
+          startedAt: task.startedAt,
+          completedAt: task.completedAt,
         };
       });
 
