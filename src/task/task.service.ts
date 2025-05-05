@@ -125,7 +125,22 @@ export class TaskService {
           userId: new Types.ObjectId(userId),
           $or: [
             { startedAt: { $gte: start, $lte: end } },
+
             { completedAt: { $gte: start, $lte: end } },
+
+            {
+              $and: [
+                { completedAt: { $exists: false } },
+                { createdAt: { $gte: start, $lte: end } },
+              ],
+            },
+
+            {
+              $and: [
+                { completedAt: { $exists: false } },
+                { createdAt: { $lte: end } },
+              ],
+            },
           ],
         })
         .populate("userId", "-password")
