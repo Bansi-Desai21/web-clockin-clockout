@@ -200,7 +200,7 @@ export class DayInDayOutService {
       const records = await this.dayInDayOutModel
         .find(filter)
         .populate("userId", "-password")
-        .sort({ dayIn: -1 })
+        .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit);
 
