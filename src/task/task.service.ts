@@ -159,8 +159,7 @@ export class TaskService {
           user: task.userId,
           title: task.title,
           description: task.description,
-          startTime: startTime ? this.formatTime(startTime) : "--",
-          endTime: endTime ? this.formatTime(endTime) : "--",
+          timeLog: task.timeLogs,
           duration,
           isRunning: !task.completedAt,
           startedAt: task.startedAt,
@@ -184,13 +183,6 @@ export class TaskService {
         error.status || HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
-  }
-
-  private formatTime(date: Date): string {
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
   private calculateDuration(start: Date, end: Date): string {
@@ -225,13 +217,6 @@ export class TaskService {
       if (status === "in-progress") {
         task.startedAt = task.startedAt || now;
         task.timeLogs.push({ start: now });
-      } else if (status === "paused") {
-        if (
-          task.timeLogs.length > 0 &&
-          !task.timeLogs[task.timeLogs.length - 1].end
-        ) {
-          task.timeLogs[task.timeLogs.length - 1].end = now;
-        }
       } else if (status === "completed") {
         task.completedAt = now;
         if (

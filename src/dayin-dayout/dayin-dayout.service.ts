@@ -15,13 +15,39 @@ import {
   EnhancedHttpException,
 } from "../utils/helper.response.function";
 import { Types } from "mongoose";
-
+import { TaskDocument, Task } from "../../schemas/task.schema";
 @Injectable()
 export class DayInDayOutService {
   constructor(
     @InjectModel(DayInDayOut.name)
-    private readonly dayInDayOutModel: Model<DayInDayOutDocument>
+    private readonly dayInDayOutModel: Model<DayInDayOutDocument>,
+    @InjectModel(Task.name)
+    private readonly taskModel: Model<TaskDocument>
   ) {}
+
+  async pauseInProgressTasks(
+    userId: string,
+    reason: string = "Automatically paused due to clock out/day out"
+  ) {
+    await this.taskModel.updateMany(
+      { userId: new Types.ObjectId(userId), status: "in-progress" },
+      {
+        $set: { status: "completed", updatedAt: new Date() },
+        $push: {
+          history: {
+            action: reason,
+            timestamp: new Date(),
+          },
+        },
+        $currentDate: {
+          "timeLogs.$[elem].end": true,
+        },
+      },
+      {
+        arrayFilters: [{ "elem.end": { $exists: false } }],
+      }
+    );
+  }
 
   async recordAttendance(
     userId: string,
@@ -123,8 +149,14 @@ export class DayInDayOutService {
             });
           }
 
+          await this.pauseInProgressTasks(
+            userId,
+            "Automatically paused due to clock out"
+          );
           lastClockOut.clockOut = new Date();
+
           await existingEntry.save();
+
           return createResponse(
             HttpStatus.OK,
             true,
@@ -141,6 +173,11 @@ export class DayInDayOutService {
               path: path,
             });
           }
+
+          await this.pauseInProgressTasks(
+            userId,
+            "Automatically paused due to day out"
+          );
 
           existingEntry.dayOut = new Date();
           existingEntry.isCompleted = true;
