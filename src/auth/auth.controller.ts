@@ -52,6 +52,7 @@ export class AuthController {
   }
 
   @Get("users")
+  @ApiBearerAuth()
   @ApiOperation({ summary: "Get list of users" })
   @ApiResponse({
     status: HttpStatus.OK,
